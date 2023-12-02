@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Almarai:wght@800&family=Alumni+Sans:wght@700;800&family=Be+Vietnam+Pro:wght@900&family=Bebas+Neue&family=Big+Shoulders+Inline+Display:wght@300&family=Noto+Serif:wght@500&family=Petit+Formal+Script&family=Raleway:ital,wght@0,600;1,600&family=Roboto+Condensed:wght@600&family=Yesteryear&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Almarai:wght@800&family=Alumni+Sans:wght@700;800&family=Asap+Condensed:ital,wght@0,500;1,200&family=Be+Vietnam+Pro:wght@900&family=Bebas+Neue&family=Big+Shoulders+Inline+Display:wght@300&family=Heebo:wght@900&family=Noto+Serif:wght@500&family=Petit+Formal+Script&family=Poppins&family=Raleway:ital,wght@0,600;1,600&family=Roboto+Condensed:wght@500;600&family=Saira+Extra+Condensed:wght@100;800&family=Yesteryear&display=swap" rel="stylesheet">    <link rel="stylesheet" href="catalog.css">
+    <!-- Add your additional CSS styles or links here -->
+
+</head>
+
+<body class="showCart">
+    <header class="header-container">
+        <div class="icon"><i class="fa-solid fa-cart-shopping"></i></div>
+        <div class="span-icon"><span>0</span></div>
+        <h1>SWEET TRADITIONS: A FILIPINO DESSERT DISCOVERY CATALOG</h1>
+    </header>
+
+    <div id="output" class="product-container"></div>
+
+    <div class="tabcart">
+        <h1>Shopping Cart</h1>
+        <div class="itemList">
+            <!-- Shopping cart items will be dynamically added here -->
+        </div>
+        <div class="cart-button">
+            <button class="close">CLOSE</button>
+            <button class="check-out">CHECK OUT</button>
+        </div>
+    </div>
+
+    <script>
+        let icon = document.querySelector('.icon');
+        let body = document.querySelector('body');
+        let closeCart = document.querySelector('.close')
+        let listProduct = document.querySelector('.itemList')
+
+        let shoppingCart = []; // Array to store added products
+
+        icon.addEventListener('click', () => {
+            body.classList.toggle('showCart');
+        });
+
+        closeCart.addEventListener('click', () => {
+            body.classList.toggle('showCart');
+        });
+
+        const addToCart = (productName, price, image) => {
+            const existingItem = shoppingCart.find(item => item.productName === productName);
+
+            if (existingItem) {
+                // If it exists, increment the quantity
+                existingItem.quantity += 1;
+            } else {
+                // If not, add a new entry to the cart
+                shoppingCart.push({ productName, price, image, quantity: 1 });
+            }
+
+            updateCartCounter();
+            updateCartDisplay();
+        };
+
+        const updateCartCounter = () => {
+            let cartCounter = document.querySelector('.span-icon span');
+            cartCounter.textContent = calculateTotalQuantity();
+        };
+
+        const updateCartDisplay = () => {
+            listProduct.innerHTML = '';
+            shoppingCart.forEach(productInfo => {
+                let newProduct = document.createElement('div');
+                newProduct.classList.add('item'); // Use add instead of ()
+
+                newProduct.innerHTML = `
+                    <div class="image">
+                        <img src="${productInfo.image}" alt="">
+                    </div>
+                    <div class="name">
+                        ${productInfo.productName}
+                    </div>
+                    <div class="total">
+                        ₱${productInfo.price}
+                    </div>
+                    <div class="quantity">
+                        <span class="minus" onclick="decrementQuantity('${productInfo.productName}')"><</span>
+                        <span>${productInfo.quantity}</span>
+                        <span class="plus" onclick="incrementQuantity('${productInfo.productName}')">></span>
+                    </div>
+                `;
+
+                listProduct.appendChild(newProduct);
+            });
+        };
+
+        const calculateTotalQuantity = () => {
+            return shoppingCart.reduce((total, item) => total + item.quantity, 0);
+        };
+
+        const incrementQuantity = (productName) => {
+            const item = shoppingCart.find(item => item.productName === productName);
+            if (item) {
+                item.quantity += 1;
+                updateCartCounter();
+                updateCartDisplay();
+            }
+        };
+
+        const decrementQuantity = (productName) => {
+            const item = shoppingCart.find(item => item.productName === productName);
+            if (item && item.quantity > 1) {
+                item.quantity -= 1;
+                updateCartCounter();
+                updateCartDisplay();
+            } else if (item && item.quantity === 1) {
+                // If the quantity is 1, remove the product from the cart
+                const index = shoppingCart.indexOf(item);
+                if (index !== -1) {
+                    shoppingCart.splice(index, 1);
+                    updateCartCounter();
+                    updateCartDisplay();
+                }
+            }
+        };
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch product data from JSON
+            fetch('productInfo.json')
+                .then(response => response.json())
+                .then(data => {
+                    let outputContainer = document.getElementById("output");
+
+                    // Loop through each product in the data
+                    data.forEach(item => {
+                        let productContainer = document.createElement("div");
+                        productContainer.className = "product";
+
+                        productContainer.innerHTML = `
+                            <div><img src="${item.images}" class="image-format"></div>
+                            <div class="productName">${item.productName}</div>
+                            <div class="description">${item.description}</div>
+                            <div class="price">&#8369; ${item.price}</div>
+                            <button class="buy-button" onclick="addToCart('${item.productName}', '${item.price}', '${item.images}')">Add to Cart</button>
+                        `;
+
+                        outputContainer.appendChild(productContainer);
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>
